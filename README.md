@@ -6,7 +6,7 @@
 
 A three-skill pipeline that orchestrates AI subagents to **discover**, **filter**, and **evaluate** a large universe of options against a personal profile, with the human always in the loop for final decisions.
 
-The concrete example domain is a **job-hunt radar**: scanning ~80 target companies weekly, surfacing Product Manager and Senior PM openings that are location-viable, and producing ranked, scored evaluations of each.
+The concrete example domain is a **job-hunt radar**: scanning ~80 target companies weekly, surfacing Product Manager openings that are location-viable, and producing ranked, scored evaluations of each.
 
 The same pattern applies to: vendor selection, conference talk submissions, M&A pipeline, grant applications, real-estate listings — anywhere you have many options and need consistent, evidence-based triage.
 
