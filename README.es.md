@@ -31,7 +31,39 @@ Un lunes típico, el radar escanea 80 empresas, encuentra 22 con ofertas de PM o
 | 4 | OldCorp   | PM — Internal Tools       | 54    | Descartar. Sin AI, movimiento lateral.                 |
 ```
 
-Debajo de la tabla, cada fila se expande con el desglose: por qué tiene ese score, las ventajas que te diferencian, los gaps reales del fit, y las tres preguntas que tienes que hacer antes de aplicar. Eliges cuáles van a tu pipeline activo. El resto se queda en el log del radar para el próximo lunes.
+Cada fila se expande con el desglose completo. Por ejemplo, la posición #1:
+
+```
+### Lumora · PM — AI Safety Evaluations  ⭐
+
+Score Ajustado: 89/100  ·  Veredicto: Aplicar YA
+Desglose: Fit 91 · Salud financiera 88 · Resiliencia frente a IA 86
+
+Ventajas diferenciales que te separan del resto:
+  · Construiste un framework de evaluación de LLMs en tu rol anterior —
+    exactamente el artefacto que produce este equipo.
+  · 8 años en B2B enterprise SaaS — hablas el idioma de los clientes
+    regulados de Lumora.
+  · Agentic AI en producción — cubre dos requisitos del rol de una vez.
+
+Gaps reales del fit (no se compensan con cover letter):
+  · Sin background formal en AI safety research (no papers ni red-team
+    leadership).
+  · Inglés C1 frente a equipo nativo en comunicación research-heavy.
+  · Sin experiencia previa como PM dentro de un AI lab frontier.
+
+Preguntas a validar antes de aplicar:
+  · ¿Se espera co-autoría de papers de safety, o solo product translation
+    de findings de research?
+  · ¿Contratación directa desde España o vía EOR? El JD dice "Europe"
+    pero no especifica país concreto.
+  · ¿Reporta a Head of Safety Research o a VP Product? Define el día a
+    día research-led vs. roadmap-led.
+
+URL: https://jobs.lumora-ai.com/jobs/91234567
+```
+
+Eliges cuáles van a tu pipeline activo. El resto se queda en el log del radar para la próxima semana.
 
 ## Funcionando contra el mundo real (abril–mayo 2026)
 
@@ -42,16 +74,6 @@ Casi dos tercios de lo que tenía era ruido bien presentado.
 Eso es lo que me hizo rediseñar la capa de validación entera. Después del cambio, en el mes siguiente, ni un solo enlace muerto.
 
 Sin esa capa, te pasas la semana aplicando a fantasmas: ofertas que existen en Google pero ya no en la realidad.
-
-## Lo que aún no hace
-
-Cinco cosas que no he resuelto. Por orden de cuánto me incomodan.
-
-- **Las webs de empleo de algunas empresas grandes detectan y bloquean accesos automatizados.** Unas 4-5 de mis 80 empresas objetivo acaban en zona ciega: las puedo mirar una vez, no de forma confiable cada semana.
-- **Las ofertas que solo se publican en LinkedIn son invisibles para el radar.** No hay forma pública de consultar la base de datos de empleos de LinkedIn.
-- **El filtro de títulos busca palabras concretas para excluir** (Principal, Staff, Director). Si una empresa usa un título creativo como "Product Strategy Lead", se cuela porque no contiene ninguna palabra bloqueada. Pendiente: filtro semántico.
-- **Si una empresa cambia silenciosamente la ubicación o los requisitos** de una oferta después de publicarla, no me entero hasta que abro el detalle.
-- **No extraigo bandas salariales** porque la mayoría de ofertas no las publican. Eso sigue siendo pregunta de primera call con el recruiter.
 
 ## Setup
 

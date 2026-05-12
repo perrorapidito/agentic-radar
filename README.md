@@ -31,7 +31,39 @@ On a typical Monday, the radar scans 80 companies, finds 22 with open PM or Seni
 | 4 | OldCorp   | PM — Internal Tools       | 54    | Discard. No AI footprint, lateral move.                |
 ```
 
-Below the table, each row expands: why it got that score, the advantages that set you apart, real gaps in the fit, and the three questions to ask before applying. You pick which ones belong in your active pipeline. The rest stay in the radar log for next week's recheck.
+Each row expands into the full breakdown. The top one looks like this:
+
+```
+### Lumora · PM — AI Safety Evaluations  ⭐
+
+Adjusted Score: 89/100  ·  Verdict: Apply NOW
+Breakdown: Fit 91 · Financial Health 88 · AI Resilience 86
+
+Differentiating advantages that set you apart:
+  · Built an LLM evaluation framework in your previous role —
+    the exact artifact this team produces.
+  · 8 years in B2B enterprise SaaS — you speak the language of
+    Lumora's regulated buyers.
+  · Agentic AI in production — covers two job requirements at once.
+
+Real gaps in the fit (not coverable by a cover letter):
+  · No formal background in AI safety research (no papers, no
+    red-team leadership).
+  · C1 English versus a native-speaker team in research-heavy comms.
+  · No prior PM experience inside a frontier AI lab.
+
+Questions to validate before applying:
+  · Is co-authorship of safety papers expected, or only product
+    translation of research findings?
+  · Contracting direct from Spain, or via EOR? JD says "Europe"
+    but doesn't specify a country.
+  · Reports to Head of Safety Research or to VP Product? Defines
+    research-led vs. roadmap-led day-to-day.
+
+URL: https://jobs.lumora-ai.com/jobs/91234567
+```
+
+You pick which ones belong in your active pipeline. The rest stay in the radar log for next week.
 
 ## Running it against the real world (April–May 2026)
 
@@ -42,16 +74,6 @@ Almost two-thirds of what I had was well-presented noise.
 That's what made me redesign the validation layer from scratch. In the month after the change, not a single dead link.
 
 Without that layer, you spend your week applying to ghosts: jobs that exist on Google but no longer in reality.
-
-## What this doesn't do (yet)
-
-Five things I haven't solved. In order of how much they bug me.
-
-- **Some big companies' career sites detect and block automated access.** Around 4-5 of my 80 targets land in a blind spot: I can check them once, but not reliably every week.
-- **Jobs posted only on LinkedIn are invisible to the radar.** There's no public way to query LinkedIn's jobs database.
-- **The title filter looks for specific words to exclude** (Principal, Staff, Director). If a company uses a creative title like "Product Strategy Lead", it slips through because it contains none of the blocked words. Semantic filtering is on the list.
-- **If a company quietly changes the location or requirements** of a posting after publishing, I don't find out until I open it.
-- **I don't extract salary bands** because most postings don't publish them. That stays a first-recruiter-call question.
 
 ## Setup
 
