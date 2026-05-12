@@ -1,0 +1,11 @@
+# Private data — never commit these
+inventory/
+pipeline/
+profile/
+*.private.md
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+*.swp
