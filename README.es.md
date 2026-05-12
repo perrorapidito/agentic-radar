@@ -2,7 +2,7 @@
 
 Un radar semanal con IA para buscar trabajo a escala. Construido con Claude Code.
 
-Hecho por [Francisco de la Cortina](https://www.linkedin.com/in/fdelacortina/). Ocho años en Product Management, los últimos cuatro construyendo agentic AI en SaaS enterprise. Actualmente buscando mi siguiente rol.
+Hecho por [Francisco de la Cortina](https://www.linkedin.com/in/fdelacortina/). Ocho años en Product Management, los últimos cuatro construyendo agentic AI en SaaS enterprise. 
 
 > 🌐 [English](README.md) · **Español**
 
