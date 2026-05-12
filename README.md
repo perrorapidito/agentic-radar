@@ -1,5 +1,7 @@
 # Agentic Radar
 
+> 🌐 **English** · [Español](README.es.md)
+
 > A weekly AI radar that scans your target companies, finds the right openings, and tells you what's worth applying to — built with Claude Code slash commands.
 
 ## The problem this solves

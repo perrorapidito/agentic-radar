@@ -1,5 +1,7 @@
 # Architecture
 
+> 🌐 **English** · [Español](architecture.es.md)
+
 ## The problem
 
 You have a large, slowly-changing universe of options (companies, vendors, RFPs, grants, listings) and you need to:
