@@ -34,13 +34,13 @@ After a Monday run, you open Claude Code to this in chat:
 ```
 ## Radar — Evaluation 2026-05-18
 
-| # | Company    | Role                              | Score  | Verdict       |
-|---|------------|-----------------------------------|--------|---------------|
-| 1 | Lumora AI  | PM — AI Safety Evaluations        | 89/100 | ⭐ Apply NOW  |
-| 2 | DataForge  | Senior PM — Streaming Ingestion   | 82/100 | Apply         |
-| 3 | Northwind  | PM — Pricing & Monetization       | 71/100 | Decide        |
-| 4 | Kraken DE  | PM — German Energy Market         | 68/100 | Decide        |
-| 5 | OldCorp    | PM — Internal Tools               | 54/100 | Discard       |
+| # | Company    | Role                              | Score  | The AI's read                                                        |
+|---|------------|-----------------------------------|--------|----------------------------------------------------------------------|
+| 1 | Lumora AI  | PM — AI Safety Evaluations        | 89/100 | ⭐ Apply NOW — "Builds the exact artifact you already shipped last year." |
+| 2 | DataForge  | Senior PM — Streaming Ingestion   | 82/100 | Apply — "Strong technical match; the team needs your customer-discovery chops."  |
+| 3 | Northwind  | PM — Pricing & Monetization       | 71/100 | Decide — "Fintech pivot; worth a recruiter call before investing in a cover letter." |
+| 4 | Kraken DE  | PM — German Energy Market         | 68/100 | Decide — "Spain-adjacent via EOR, but the JD reads native-German for discovery."   |
+| 5 | OldCorp    | PM — Internal Tools               | 54/100 | Discard — "No AI footprint, no public-facing impact — strictly lateral."          |
 ```
 
 And below it, the detailed block for each. The top hit looks like this:
@@ -96,17 +96,75 @@ Each opportunity evaluation involves 15K tokens of company research, JD parsing,
 
 The human gets the rankings and decides what enters their pipeline. The AI never auto-applies, never auto-promotes. That separation is what makes the system trustworthy enough to run weekly without supervision.
 
-## Try it on your own search
+## Set this up yourself — no coding needed
 
-This is built for [Claude Code](https://claude.com/claude-code). To adopt it:
+This is built for **[Claude Code](https://claude.com/claude-code)**, a desktop app from Anthropic that lets you chat with Claude *and* have it do real things on your computer — read files, edit them, run scheduled tasks. Think of it as "Claude with hands".
 
-1. **Drop the three files in `commands/` into your `~/.claude/commands/`.** They become `/scan-targets`, `/evaluate-target`, and `/radar`.
-2. **Build your inventory.** Copy `examples/targets-inventory.example.md` and replace the placeholder rows with your real target companies + careers URLs. Don't commit this file — it's in `.gitignore` by default.
-3. **Tune the filters** in `commands/scan-targets.md`:
-   - `TITLE_BLOCKERS` — which titles to exclude (Principal, Staff, Director, etc.)
-   - Location lists (`SPAIN_STRONG`, `EMEA_PLACES`, `US_ONLY_PLACES`) — where you can actually work
-4. **Run `/radar`.** First run takes longer because it discovers each company's ATS slug; subsequent runs are fast.
-5. **Schedule it** via Claude Code's `/schedule` once you trust the output. Recommended: `0 8 * * 1` (Mondays 8am, your timezone).
+If you can write a job-search spreadsheet, you can set this up. **Estimated time: 30–45 minutes the first time. After that, it runs itself every Monday.**
+
+### Step 1 — Install Claude Code (5 min)
+
+Download from [claude.com/claude-code](https://claude.com/claude-code) and sign in. It's a normal Mac/Windows app.
+
+### Step 2 — Add the three "skills" (5 min)
+
+A "slash command" in Claude Code is a pre-written instruction that you trigger by typing `/something` in chat. This repo gives you three of them:
+
+1. Open Claude Code.
+2. In the chat, type: `/init` — Claude will create the folder structure for you, including a `~/.claude/commands/` directory.
+3. Download the three files inside the [`commands/`](commands/) folder of this repo (`scan-targets.md`, `evaluate-target.md`, `radar.md`) and drop them into your `~/.claude/commands/` folder.
+4. Restart Claude Code. Type `/` in the chat — you should now see `/scan-targets`, `/evaluate-target`, and `/radar` in the list.
+
+That's it. No code written. The "skills" are just markdown files describing what Claude should do; Claude does the actual work.
+
+### Step 3 — Build your target list (10 min)
+
+Make a simple list of the companies you want the radar to check every week. The format is shown in [`examples/targets-inventory.example.md`](examples/targets-inventory.example.md) — a markdown table you can edit in any text editor (or VS Code, or Notion, or even on GitHub directly).
+
+Each row needs only **company name + careers page URL**. The radar will figure out the rest on its first run.
+
+Save it somewhere private (your own folder, a private Google Doc, a private GitHub repo). Don't put it in the public version of this repo — it's in `.gitignore` for that reason.
+
+### Step 4 — Tell Claude what kind of role you want (5 min)
+
+This is the only "configuration" step. Open `commands/scan-targets.md` in Claude Code and ask Claude in chat:
+
+> *"In the file `commands/scan-targets.md`, change the title filter to also accept Principal PM"*
+
+Or:
+
+> *"Change the location filter so it accepts Berlin and Amsterdam as valid locations"*
+
+You don't have to edit the file by hand — just tell Claude what you want and it edits the file for you. (This is the actual workflow people use Claude Code for.)
+
+### Step 5 — Run it once (2 min)
+
+In Claude Code chat, type: `/radar`
+
+The first run takes longer because the system has to figure out which job-board platform each company uses. After it finishes, you'll see the ranked table — exactly like the one in the example above.
+
+### Step 6 — Schedule it weekly (1 min)
+
+Type in chat: `/schedule`
+
+When asked, give it:
+- **Name**: `radar-weekly`
+- **Cron**: `0 8 * * 1` (means "every Monday at 8:00 AM")
+- **Command**: `/radar`
+
+Now every Monday morning you'll find the radar's output waiting for you. You spend 5 minutes deciding what to pursue. Done.
+
+### What if I get stuck?
+
+Ask Claude directly in the chat. Examples that work:
+
+> *"The scan returned 0 hits for Company X but I know they're hiring — what's wrong?"*
+
+> *"Re-run the radar but only on these 3 companies: Lumora, DataForge, Northwind"*
+
+> *"Add a new company to my target list: Atomic AI, careers page is https://atomic.ai/jobs"*
+
+The skills are written so Claude can fix, extend, and operate them through normal conversation. You don't need to learn YAML, Python, or any framework — just talk to it.
 
 ## For the curious
 
