@@ -4,7 +4,7 @@
 
 ## The problem
 
-You have a large, slowly-changing universe of options (companies, vendors, RFPs, grants, listings) and you need to:
+You have a large, slowly-changing universe of options (companies, vendors, RFPs, grants, user-interview candidates for product discovery, listings) and you need to:
 
 1. Discover which options have **active opportunities** right now.
 2. Filter them by **objective constraints** (location, role title, deadline).

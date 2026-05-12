@@ -4,7 +4,7 @@
 
 ## El problema
 
-Tienes un universo grande y de cambio lento de opciones (empresas, proveedores, RFPs, grants, listings) y necesitas:
+Tienes un universo grande y de cambio lento de opciones (empresas, proveedores, RFPs, grants, candidatos a entrevista para product discovery, listings) y necesitas:
 
 1. Descubrir qué opciones tienen **oportunidades activas** ahora mismo.
 2. Filtrarlas por **restricciones objetivas** (ubicación, título del rol, deadline).
