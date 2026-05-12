@@ -1,93 +1,123 @@
 # Agentic Radar
 
-> A pattern for evaluating a long-tail of options in parallel with AI subagents — built as Claude Code slash commands. Job-search instantiation included.
+> A weekly AI radar that scans your target companies, finds the right openings, and tells you what's worth applying to — built with Claude Code slash commands.
 
-## What this is
+## The problem this solves
 
-A three-skill pipeline that orchestrates AI subagents to **discover**, **filter**, and **evaluate** a large universe of options against a personal profile, with the human always in the loop for final decisions.
+You've curated a list of 80 companies you'd love to work at. Every Monday, the ritual:
 
-The concrete example domain is a **job-hunt radar**: scanning ~80 target companies weekly, surfacing Product Manager openings that are location-viable, and producing ranked, scored evaluations of each.
+- Open 80 careers pages. Most have no Product Manager openings. Some redirect to dead links. A few have 47 jobs but you only care about 1.
+- Check LinkedIn alerts. They show you the same opening 6 times across different agencies.
+- Lose an hour to a single posting that turns out to be US-only with no Spain remote.
+- By the time you finish the list, the first ones you checked already have new postings.
+- Decide whether to apply based on gut feel, because there's no time to actually research the company's funding, team, runway, AI strategy.
 
-The same pattern applies to: vendor selection, conference talk submissions, M&A pipeline, grant applications, real-estate listings — anywhere you have many options and need consistent, evidence-based triage.
+**Three months in, you're applying to whatever's loudest.** That's not a hiring strategy, that's burnout management.
 
-## Architecture
+This radar is what I built to escape that loop.
 
-```
-┌─────────────────┐   ┌──────────────────┐   ┌──────────────────────────┐
-│ /scan-targets   │ → │ filter (location)│ → │ /radar (orchestrator)    │
-│ JSON APIs +     │   │ + verdict tag    │   │  ├─ spawn N subagents    │
-│ HEAD validation │   │ (OK/EMEA_CTRY/   │   │  │  in batches of 3      │
-│                 │   │  AMBIG/NO)       │   │  ├─ each runs /evaluate  │
-│                 │   │                  │   │  │  in isolated context  │
-│                 │   │                  │   │  └─ aggregate compact    │
-│                 │   │                  │   │     verdict per option   │
-└─────────────────┘   └──────────────────┘   └──────────────────────────┘
-                                                         │
-                                              ┌──────────▼──────────┐
-                                              │ ranked table → user │
-                                              │ confirms pipeline   │
-                                              │ adds (never auto)   │
-                                              └─────────────────────┘
-```
+## What it actually does
 
-## The three skills
+Every Monday at 8am, it:
 
-| Skill | Job |
-|---|---|
-| [`scan-targets.md`](commands/scan-targets.md) | Discovers open opportunities across an inventory of targets. Uses JSON APIs (Greenhouse, Lever, Ashby, Workable, Personio) when possible; falls back to WebFetch for proprietary career sites. Every URL is HEAD-validated before being reported. |
-| [`evaluate-target.md`](commands/evaluate-target.md) | Scores a single opportunity against a user profile. Returns a compact block: total score, sub-scores, advantages, gaps, questions to validate. |
-| [`radar.md`](commands/radar.md) | Orchestrator. Chains the scan → filters by location verdict → spawns subagents (batches of 3) that each run `evaluate-target` in isolation → aggregates a ranked table → asks the user which to add to the pipeline. |
+1. **Scans** your target companies via their job-board APIs (Greenhouse, Lever, Ashby, Workable, Personio). Validates every URL before reporting it — no dead links.
+2. **Filters** to titles you actually want (Product Manager / Senior PM, not Principal/Staff/Director) and locations you can actually take (Spain, EMEA-remote, worldwide — never US-only).
+3. **Evaluates** each surviving opportunity in parallel — an isolated AI subagent looks up the company's funding, headcount, layoffs, and culture, then scores the role against your profile across three dimensions: fit, financial health, and AI resilience.
+4. **Hands you a ranked list** with verdicts (`Apply NOW`, `Decide`, `Discard`) and the three real gaps + three real questions to ask before applying.
 
-## Design principles
+You spend 5 minutes Monday morning deciding which to pursue. The radar did the 4 hours of legwork while you slept.
 
-1. **JSON APIs before scraping**. Every major ATS (Greenhouse, Lever, Ashby, Workable, Personio) exposes a JSON board. Use it. Cleaner data, canonical URLs, no hallucination, ~10× cheaper in tokens than HTML scraping.
-2. **Validate every URL before reporting**. A HEAD request gate catches dead links, ATS error redirects (`?error=true`), and stale board fall-throughs. Without this gate, ~60% of URLs in a typical scan are stale within 4 weeks.
-3. **Subagents protect the main context**. Each opportunity evaluation can be 5–15K tokens (WebSearch on company + JD parsing + scoring). Running them all in main context exhausts the window. Subagents run in parallel batches of 3, return only a 400-word verdict block.
-4. **The human stays in the loop for irreversible state**. The radar produces a ranked table and *asks* before writing to `pipeline.md`. The pattern explicitly refuses automation of "what should I apply to" — that's a human decision, not an inference.
-5. **WebSearch only for slug discovery, never for URLs**. Google indexes job boards with a 1–4 week lag. Resolving an opportunity URL via search returns dead links. Search is only used to discover *which ATS* a company uses; URLs always come from the live API.
+## What it looks like (fictional example)
 
-## Lessons learned
-
-Real bugs caught while building this. Useful if you're implementing something similar:
-
-- **Ashby pages render with JavaScript**. The HTML payload is a skeleton; jobs come from `https://api.ashbyhq.com/posting-api/job-board/{slug}`. WebFetch on the careers page returns nothing useful — go to the API.
-- **Ashby `locationName` is often empty**. The real location lives in `workplaceType` + `secondaryLocations[].location` + `isRemote`. A naive filter on `locationName` drops legitimate hits.
-- **Workable's `/api/v3/accounts/{slug}/jobs` returns 404**. The working endpoint is `/api/v1/widget/accounts/{slug}` returning `{name, jobs[]}`.
-- **Greenhouse redirects deleted jobs to `{slug}?error=true`** (200 OK). HEAD-validate the *effective URL*, not just status code, or you'll think dead jobs are alive.
-- **Workday CXS API (`/wday/cxs/{tenant}/{site}/jobs`) is anti-bot aggressive**. First call may succeed; subsequent calls return 400/422. Fall back to WebFetch with a strict, structured prompt — and flag the resulting URLs as "verify manually" since WebFetch can occasionally infer URLs.
-- **Parallel API requests above ~5 trigger 403 on Ashby**. Process Ashby slugs sequentially with `sleep 1`; the other ATSes are fine in parallel.
-- **Location strings need keyword matching, not regex**. Strings like `"Remote, US-Southeast"` or `"Amsterdam, Netherlands"` are messy. A small keyword list (EMEA cities, US-only signals, strong markers like "Europe"/"EMEA") with explicit precedence rules beats a single regex every time.
-- **A "Senior Technical PM" is not a "Senior PM"**. If your filter blocks `technical` you also block titles like "Senior Technical Product Manager" which are usually within scope. Distinguish `technical program` (TPM) from `technical product` (a real PM).
-
-See [`docs/lessons-learned.md`](docs/lessons-learned.md) for the long version.
-
-## How to use this
-
-This was built for [Claude Code](https://claude.com/claude-code). The three `.md` files in `commands/` are slash-command definitions — drop them into your `~/.claude/commands/` directory and they become `/scan-targets`, `/evaluate-target`, `/radar`.
-
-To adapt to your case, edit:
-
-- `commands/scan-targets.md` — the inventory file path, the title filter (`TITLE_BLOCKERS`), the location filter (`SPAIN_STRONG`, `EMEA_PLACES`, `US_ONLY_PLACES`)
-- `commands/evaluate-target.md` — the user profile location, the scoring weights, what counts as "Aplicar YA" / "Decidir" / "Descartar"
-- `commands/radar.md` — the cron in `/schedule` once you're happy with it
-
-An empty inventory template is in [`examples/targets-inventory.example.md`](examples/targets-inventory.example.md).
-
-## Scheduling
-
-Once you trust the output, schedule it weekly via Claude Code's `/schedule`:
+After a Monday run, you open Claude Code to this in chat:
 
 ```
-/schedule
-# name: radar-semanal
-# cron: 0 8 * * 1     (Monday 8am, your timezone)
-# command: /radar
+## Radar — Evaluation 2026-05-18
+
+| # | Company    | Role                              | Score  | Verdict       |
+|---|------------|-----------------------------------|--------|---------------|
+| 1 | Lumora AI  | PM — AI Safety Evaluations        | 89/100 | ⭐ Apply NOW  |
+| 2 | DataForge  | Senior PM — Streaming Ingestion   | 82/100 | Apply         |
+| 3 | Northwind  | PM — Pricing & Monetization       | 71/100 | Decide        |
+| 4 | Kraken DE  | PM — German Energy Market         | 68/100 | Decide        |
+| 5 | OldCorp    | PM — Internal Tools               | 54/100 | Discard       |
 ```
+
+And below it, the detailed block for each. The top hit looks like this:
+
+```
+### Lumora AI · PM — AI Safety Evaluations  ⭐
+- Adjusted Score: 89/100
+- Verdict: Apply NOW
+- Breakdown: Fit 91 · Health 88 · Resilience 86
+
+Differentiating advantages (top 3):
+- Built an LLM evaluation framework in your last role —
+  exact artifact this team produces (red-teaming, eval metrics, HITL loops).
+- 8 years B2B enterprise SaaS — speaks the language of Lumora's buyers
+  (regulated industries, sovereign AI nicho).
+- Multi-cloud + agentic AI in production — covers two job requirements at once.
+
+Real gaps (top 3):
+- No formal AI safety research background (no papers, no red-team leadership).
+- C1 English vs. native-speaker team in research-heavy comms.
+- No previous PM experience inside a frontier AI lab (you've applied LLMs,
+  not trained foundation models).
+
+Questions to validate before applying:
+- Is co-authorship of safety papers expected, or only product translation
+  of research findings?
+- Spain contracting direct or via EOR? (Europe listed but country not confirmed.)
+- Reports to Head of Safety Research or VP Product?
+  → defines research-led vs. roadmap-led day-to-day.
+
+URL: https://jobs.lumora-ai.com/jobs/91234567  (HEAD-validated 2026-05-18 08:14)
+```
+
+You read four of these, decide `1, 3` belong in your active pipeline, and tell the radar. It writes those two to your tracker; the rest stay in the radar log for next week's recheck.
+
+**That's it. That's the workflow.**
+
+## Why it works
+
+Three design decisions, each of which I had to learn the hard way:
+
+### 1. Talk to the APIs, not the websites
+
+Every major hiring platform (Greenhouse, Lever, Ashby, Workable, Personio) exposes a JSON feed of open positions. Reading the website instead is how you end up with hallucinated URLs that look right but don't exist, and dead links cached by Google three weeks ago.
+
+### 2. Validate every URL before showing it to a human
+
+A simple HEAD request, but done strictly. Greenhouse silently redirects deleted jobs to `?error=true`. Ashby reroutes closed postings to the board root. Without validation, ~60% of "active" listings reported to you are actually dead within four weeks.
+
+### 3. Use subagents for the deep work, keep the human in the main loop
+
+Each opportunity evaluation involves 15K tokens of company research, JD parsing, and scoring. Doing 7 of those inline destroys the AI's reasoning quality for everything that comes after. Sending each to an isolated AI subagent that returns only a 400-word verdict block keeps your main context clean — and the subagents run 3 at a time in parallel, so the whole batch takes ~2 minutes.
+
+The human gets the rankings and decides what enters their pipeline. The AI never auto-applies, never auto-promotes. That separation is what makes the system trustworthy enough to run weekly without supervision.
+
+## Try it on your own search
+
+This is built for [Claude Code](https://claude.com/claude-code). To adopt it:
+
+1. **Drop the three files in `commands/` into your `~/.claude/commands/`.** They become `/scan-targets`, `/evaluate-target`, and `/radar`.
+2. **Build your inventory.** Copy `examples/targets-inventory.example.md` and replace the placeholder rows with your real target companies + careers URLs. Don't commit this file — it's in `.gitignore` by default.
+3. **Tune the filters** in `commands/scan-targets.md`:
+   - `TITLE_BLOCKERS` — which titles to exclude (Principal, Staff, Director, etc.)
+   - Location lists (`SPAIN_STRONG`, `EMEA_PLACES`, `US_ONLY_PLACES`) — where you can actually work
+4. **Run `/radar`.** First run takes longer because it discovers each company's ATS slug; subsequent runs are fast.
+5. **Schedule it** via Claude Code's `/schedule` once you trust the output. Recommended: `0 8 * * 1` (Mondays 8am, your timezone).
+
+## For the curious
+
+If you want the technical depth:
+
+- [docs/architecture.md](docs/architecture.md) — why subagents instead of one big loop, the token economics, the human-in-the-loop boundary
+- [docs/lessons-learned.md](docs/lessons-learned.md) — the 8 specific bugs I caught while building this: anti-bot patterns, JS-rendered pages, hallucinated URLs, location parsing edge cases
+- [commands/](commands/) — the three slash-command definitions, fully annotated
+
+The pattern generalizes beyond job-hunting. Anywhere you have a long tail of options (vendors, RFPs, grant calls, conference CFPs, real-estate listings) and need consistent, evidence-based triage with a human-in-the-loop decision step, this same architecture applies. Swap the title filter, swap the scoring weights, change the inventory source — the orchestrator stays the same.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
-
-## Acknowledgments
-
-Built with Claude Code (Anthropic). The pattern was iterated through real use against a real job search — the code only got robust because real URLs went stale, real APIs rate-limited, and a real ranking surfaced real candidates.
+MIT. Fork it. Adapt it. Make your own ritual a little less terrible.
