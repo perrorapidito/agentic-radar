@@ -2,7 +2,7 @@
 
 A weekly AI radar for job-hunting at scale. Built with Claude Code.
 
-Built by [Francisco de la Cortina](https://www.linkedin.com/in/fdelacortina/). Eight years in Product Management, the last four shipping agentic AI in enterprise SaaS. Currently looking for my next role.
+Built by [Francisco de la Cortina](https://www.linkedin.com/in/fdelacortina/). Eight years in Product Management, the last four shipping agentic AI in enterprise SaaS. 
 
 > 🌐 **English** · [Español](README.es.md)
 
